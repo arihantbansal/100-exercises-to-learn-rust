@@ -1,12 +1,13 @@
-// TODO: Given a vector of integers, leak its heap allocation.
-//  Then split the resulting static slice into two halves and
-//  sum each half in a separate thread.
-//  Hint: check out `Vec::leak`.
-
 use std::thread;
 
 pub fn sum(v: Vec<i32>) -> i32 {
-    todo!()
+    let leaked_v = Vec::leak(v);
+    let (a, b) = leaked_v.split_at(leaked_v.len() / 2);
+
+    let first_sum = thread::spawn(|| -> i32 { a.iter().sum() });
+    let second_sum = thread::spawn(|| -> i32 { b.iter().sum() });
+
+    first_sum.join().unwrap() + second_sum.join().unwrap()
 }
 
 #[cfg(test)]
